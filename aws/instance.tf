@@ -29,3 +29,17 @@ resource "aws_instance" "web" {
     destination = "/tmp/readme.md"
   }
 }
+
+# using reusable modules in tf
+module "webserver" {
+  # path to the local module or replace this with the uri
+  source = "./modules/webserver"
+  # variables to be used inside the module
+  ami_id        = data.aws_ami.ubuntu.id
+  instance_type = "t2.small"
+}
+
+# if you want to get output from inside the module
+output "ipFromMachine" {
+  value = module.webserver.publicIP
+}
