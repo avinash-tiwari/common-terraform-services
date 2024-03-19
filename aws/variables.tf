@@ -2,10 +2,13 @@ variable "ports" {
   type = list(any)
 }
 
-variable "image_id" {
+variable "image_name" {
   type = string
 }
 
+variable "image_owner" {
+  type = number
+}
 variable "machine_type" {
   type = string
 }
