@@ -29,3 +29,8 @@ variable "env" {
 variable "env_file_arn" {
   type = string
 }
+
+variable "ecs_role" {
+  type    = string
+  default = ""
+}

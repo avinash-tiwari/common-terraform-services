@@ -7,10 +7,31 @@ resource "aws_ecs_cluster" "ecs" {
   }
 }
 
+resource "aws_iam_role" "cluster_role" {
+  count = var.ecs_role != "" ? 0 : 1
+  name  = "${var.project_name}-ecs-role"
+
+  # Terraform's "jsonencode" function converts a
+  # Terraform expression result to valid JSON syntax.
+  assume_role_policy = jsonencode({
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Effect" : "Allow",
+        "Principal" : {
+          "Service" : "ec2.amazonaws.com"
+        },
+        "Action" : "sts:AssumeRole"
+      }
+    ]
+  })
+}
+
 resource "aws_ecs_task_definition" "task_definition" {
   family                   = "${var.project_name}-${var.env}"
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
+  execution_role_arn       = var.ecs_role != "" ? var.ecs_role : aws_iam_role.cluster_role[0].arn
   cpu                      = 1024
   memory                   = 2048
 
@@ -27,7 +48,6 @@ resource "aws_ecs_task_definition" "task_definition" {
           hostPort      = 80
         }
       ]
-      #   environmentFiles = ["${var.env_file_arn}"]
       environmentFiles = [
         {
           value = "${var.env_file_arn}"
@@ -36,6 +56,12 @@ resource "aws_ecs_task_definition" "task_definition" {
       ]
       logConfiguration = {
         logDriver = "awslogs"
+        options = {
+          "awslogs-region"        = var.region
+          "awslogs-group"         = "/ecs/${var.project_name}-log-group"
+          "awslogs-stream-prefix" = "ecs"
+        }
+
       }
     }
   ])
