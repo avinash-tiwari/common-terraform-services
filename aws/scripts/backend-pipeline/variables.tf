@@ -43,3 +43,11 @@ variable "port" {
 variable "ports" {
   type = list(any)
 }
+variable "vpc_id" {
+  type        = string
+  description = "VPC Id for the project"
+}
+variable "subnet_ids" {
+  type        = list(string)
+  description = "Subnet IDs"
+}

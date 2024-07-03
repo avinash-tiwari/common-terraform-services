@@ -29,3 +29,22 @@ variable "region" {
   description = "AWS region"
   type        = string
 }
+
+
+variable "ecr_url" {
+  description = "ECR image URL"
+  type        = string
+}
+
+variable "target_group_arn" {
+  description = "ARN of the target group"
+  type        = string
+}
+variable "security_group_id" {
+  description = "Security group Id"
+  type        = string
+}
+variable "subnet_ids" {
+  description = "Subnet IDs"
+  type        = list(any)
+}

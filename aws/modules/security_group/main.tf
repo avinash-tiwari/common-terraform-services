@@ -1,4 +1,5 @@
 resource "aws_security_group" "network_ports" {
+  vpc_id = var.vpc_id
   dynamic "ingress" {
     for_each = var.ports
     iterator = port

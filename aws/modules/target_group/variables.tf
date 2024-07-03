@@ -7,3 +7,7 @@ variable "health_endpoint" {
   default     = "/health"
   description = "Health endpoint of the target group"
 }
+variable "vpc_id" {
+  type        = string
+  description = "VPC Id"
+}

@@ -9,14 +9,14 @@ resource "aws_ecs_service" "backend-server" {
     field = "cpu"
   }
 
-  # network_configuration {
-  #   subnets          = data.aws_subnets.selected.ids
-  #   security_groups  = aws_security_group.network_ports.id
-  #   assign_public_ip = true
-  # }
+  network_configuration {
+    subnets         = var.subnet_ids
+    security_groups = [var.security_group_id]
+    # assign_public_ip = true
+  }
 
   # load_balancer {
-  #   target_group_arn = aws_lb_target_group.ecs-target-group.arn
+  #   target_group_arn = var.target_group_arn
   #   container_name   = "backend-server"
   #   container_port   = var.port
   # }
