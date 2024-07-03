@@ -34,3 +34,12 @@ variable "ecs_role" {
   type    = string
   default = ""
 }
+
+variable "port" {
+  type    = number
+  default = 3000
+}
+
+variable "ports" {
+  type = list(any)
+}

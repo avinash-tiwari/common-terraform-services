@@ -37,15 +37,15 @@ resource "aws_ecs_task_definition" "task_definition" {
 
   container_definitions = jsonencode([
     {
-      name : "node-server"
+      name : "backend-server"
       image     = "${aws_ecr_repository.ecr_repo.repository_url}"
       cpu       = 1024
       memory    = 512
       essential = true
       portMappings = [
         {
-          containerPort = 80
-          hostPort      = 80
+          containerPort = var.port
+          hostPort      = var.port
         }
       ]
       environmentFiles = [
@@ -70,4 +70,91 @@ resource "aws_ecs_task_definition" "task_definition" {
     operating_system_family = "WINDOWS_SERVER_2019_CORE"
     cpu_architecture        = "X86_64"
   }
+}
+
+resource "aws_vpc" "main" {
+  cidr_block = "10.0.0.0/16"
+  tags = {
+    Name = "${var.project_name}-vpc"
+  }
+}
+
+data "aws_vpc" "selected" {
+  filter {
+    name   = "Name"
+    values = ["${var.project_name}-vpc"]
+  }
+}
+
+data "aws_subnets" "selected" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.selected.id]
+  }
+}
+resource "aws_lb_target_group" "ecs-target-group" {
+  name        = "${var.project_name}-target-group"
+  port        = 80
+  protocol    = "HTTP"
+  vpc_id      = aws_vpc.main.id
+  target_type = "ip"
+
+  health_check {
+    interval            = 30
+    path                = "/health"
+    protocol            = "HTTP"
+    timeout             = 5
+    healthy_threshold   = 5
+    unhealthy_threshold = 2
+  }
+
+}
+
+resource "aws_security_group" "network_ports" {
+  dynamic "ingress" {
+    for_each = var.ports
+    iterator = port
+    content {
+      description = port.value["name"]
+      from_port   = port.value["port"]
+      to_port     = port.value["port"]
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+  }
+
+  # allow traffic from everywhere
+  egress {
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+
+}
+
+resource "aws_ecs_service" "backend-server" {
+  name            = "backend-server"
+  cluster         = aws_ecs_cluster.ecs.id
+  task_definition = aws_ecs_task_definition.task_definition.id
+  desired_count   = 1
+
+  ordered_placement_strategy {
+    type  = "binpack"
+    field = "cpu"
+  }
+
+  network_configuration {
+    subnets          = data.aws_subnets.selected.ids
+    security_groups  = aws_security_group.network_ports.id
+    assign_public_ip = true
+  }
+
+  # load_balancer {
+  #   target_group_arn = aws_lb_target_group.ecs-target-group.arn
+  #   container_name   = "backend-server"
+  #   container_port   = var.port
+  # }
+
 }
