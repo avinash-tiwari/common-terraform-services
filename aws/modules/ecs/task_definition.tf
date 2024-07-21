@@ -1,8 +1,13 @@
+locals {
+  iam_role_arn = var.ecs_role != "" ? var.ecs_role : aws_iam_role.cluster_role[0].arn
+}
+
 resource "aws_ecs_task_definition" "task_definition" {
   family                   = "${var.project_name}-${var.env}"
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
-  execution_role_arn       = var.ecs_role != "" ? var.ecs_role : aws_iam_role.cluster_role[0].arn
+  execution_role_arn       = local.iam_role_arn
+  task_role_arn            = local.iam_role_arn
   cpu                      = 1024
   memory                   = 2048
 
@@ -29,8 +34,8 @@ resource "aws_ecs_task_definition" "task_definition" {
         logDriver = "awslogs"
         options = {
           "awslogs-region"        = var.region
-          "awslogs-group"         = "/ecs/${var.project_name}-log-group"
-          "awslogs-stream-prefix" = "ecs"
+          "awslogs-group"         = aws_cloudwatch_log_group.log_group.name
+          "awslogs-stream-prefix" = "ecs/backend-server"
         }
 
       }
@@ -38,7 +43,7 @@ resource "aws_ecs_task_definition" "task_definition" {
   ])
 
   runtime_platform {
-    operating_system_family = "WINDOWS_SERVER_2019_CORE"
-    cpu_architecture        = "X86_64"
+    operating_system_family = "LINUX"
+    cpu_architecture        = "ARM64"
   }
 }

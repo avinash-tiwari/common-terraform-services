@@ -1,7 +1,3 @@
-output "ecr_repo_url" {
-  value = "ECR repo URL = ${module.ecr.url}"
-}
-
 output "security_group_id" {
   value = "Security group = ${module.security_group.id}"
 }

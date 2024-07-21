@@ -8,9 +8,10 @@ resource "aws_iam_role" "cluster_role" {
     "Version" : "2012-10-17",
     "Statement" : [
       {
+        "Sid" : "",
         "Effect" : "Allow",
         "Principal" : {
-          "Service" : "ec2.amazonaws.com"
+          "Service" : "ecs-tasks.amazonaws.com"
         },
         "Action" : "sts:AssumeRole"
       }

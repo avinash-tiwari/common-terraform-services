@@ -1,7 +1,3 @@
-module "ecr" {
-  source       = "../../modules/ecr"
-  project_name = var.project_name
-}
 module "security_group" {
   source = "../../modules/security_group"
   ports  = var.ports
@@ -21,7 +17,7 @@ module "ecs" {
   env               = var.env
   env_file_arn      = var.env_file_arn
   ecs_role          = var.ecs_role
-  ecr_url           = module.ecr.url
+  ecr_url           = var.ecr_url
   security_group_id = module.security_group.id
   subnet_ids        = var.subnet_ids
   target_group_arn  = module.target_group.arn

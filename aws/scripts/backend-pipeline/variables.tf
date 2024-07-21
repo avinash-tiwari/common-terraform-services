@@ -40,6 +40,13 @@ variable "port" {
   default = 3000
 }
 
+variable "ecr_url" {
+  type        = string
+  description = "ECR URL for ECS"
+}
+
+
+
 variable "ports" {
   type = list(any)
 }
