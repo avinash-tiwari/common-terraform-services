@@ -17,4 +17,9 @@ resource "aws_ecs_service" "backend-server" {
     container_port   = var.port
   }
 
+  deployment_circuit_breaker {
+    enable   = true
+    rollback = true
+  }
+
 }

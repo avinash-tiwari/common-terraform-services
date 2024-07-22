@@ -15,7 +15,6 @@ module "aws_lb" {
   depends_on               = [module.target_group]
   source                   = "../../modules/load_balancer"
   project_name             = var.project_name
-  security_group_id        = module.security_group.id
   subnetIds                = var.subnet_ids
   default_target_group_arn = module.target_group.arn
 }
